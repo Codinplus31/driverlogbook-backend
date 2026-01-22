@@ -23,7 +23,7 @@ DEBUG = True
 
 # DEBUG = os.environ.get("DEBUG") != "False"
 
-ALLOWED_HOSTS = ['.onrender.com']
+ALLOWED_HOSTS = ["*"]
 
 
 

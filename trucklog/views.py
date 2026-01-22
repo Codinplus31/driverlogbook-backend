@@ -6,9 +6,7 @@ from geopy.geocoders import Nominatim
 from geopy.distance import geodesic
 import math
 
-# Mock route calculation function (in real app, use Mapbox/OSRM API)
 def calculate_route_and_distance(start, pickup, dropoff):
-    # Geocode locations using Nominatim (free, no key needed)
     geolocator = Nominatim(user_agent="trucklog-pro")
     
     def get_coords(location_name):
@@ -18,7 +16,6 @@ def calculate_route_and_distance(start, pickup, dropoff):
                 return (loc.latitude, loc.longitude)
         except:
             pass
-        # Fallback coordinates for major cities
         fallbacks = {
             'chicago, il': (41.8781, -87.6298),
             'st. louis, mo': (38.6270, -90.1994),
@@ -35,18 +32,16 @@ def calculate_route_and_distance(start, pickup, dropoff):
         for key, coords in fallbacks.items():
             if key in location_lower:
                 return coords
-        return (0, 0)  # Default if not found
+        return (0, 0)  
     
     start_coords = get_coords(start)
     pickup_coords = get_coords(pickup)
     dropoff_coords = get_coords(dropoff)
     
-    # Calculate distances between points (in miles)
     dist_start_pickup = geodesic(start_coords, pickup_coords).miles if start_coords != (0, 0) and pickup_coords != (0, 0) else 0
     dist_pickup_dropoff = geodesic(pickup_coords, dropoff_coords).miles if pickup_coords != (0, 0) and dropoff_coords != (0, 0) else 0
     total_distance = dist_start_pickup + dist_pickup_dropoff
     
-    # Return route as list of coordinates
     route_points = [start_coords, pickup_coords, dropoff_coords]
     
     return {
@@ -58,15 +53,14 @@ def calculate_route_and_distance(start, pickup, dropoff):
         }
     }
 
-# ELD Rule Engine (FMCSA HOS: 70hr/8day, 11hr driving, 14hr on-duty, 10hr off required)
 def calculate_eld_logs(current_cycle_used, distance_miles):
     logs = []
     remaining_cycle = current_cycle_used
     current_day = 1
-    total_driving = distance_miles / 55  # Assume 55 mph average speed
-    total_on_duty = 2  # 1 hr pickup + 1 hr dropoff
+    total_driving = distance_miles / 55  
+    total_on_duty = 2  
     total_fuel_stops = math.floor(distance_miles / 1000)
-    total_fuel_time = total_fuel_stops * 1  # 1 hour per fuel stop
+    total_fuel_time = total_fuel_stops * 1  
     
     total_trip_hours = total_driving + total_on_duty + total_fuel_time
     remaining_driving = total_driving
@@ -86,7 +80,6 @@ def calculate_eld_logs(current_cycle_used, distance_miles):
         available_on_duty = 14
         day_used = 0
         
-        # Use leftover on-duty from previous day if any
         if remaining_on_duty > 0 and available_on_duty > 0:
             use = min(remaining_on_duty, available_on_duty)
             day_log['entries'].append({
@@ -100,7 +93,6 @@ def calculate_eld_logs(current_cycle_used, distance_miles):
             remaining_on_duty -= use
             day_log['total_on_duty'] += use
         
-        # Driving blocks
         while available_driving > 0 and remaining_driving > 0:
             drive = min(available_driving, remaining_driving)
             if drive <= 0:
@@ -118,9 +110,8 @@ def calculate_eld_logs(current_cycle_used, distance_miles):
             remaining_driving -= drive
             day_log['total_driving'] += drive
         
-        # Fuel stops (insert during the day)
         if total_fuel_time > 0 and day_log['total_driving'] > 0:
-            fuel_to_use = min(total_fuel_time, 2)  # Max 2 hours per day for fuel
+            fuel_to_use = min(total_fuel_time, 2)  
             if fuel_to_use > 0 and available_on_duty >= fuel_to_use:
                 day_log['entries'].append({
                     'time': '14:00',
@@ -133,7 +124,6 @@ def calculate_eld_logs(current_cycle_used, distance_miles):
                 total_fuel_time -= fuel_to_use
                 day_log['total_on_duty'] += fuel_to_use
         
-        # Remaining on-duty activities
         if remaining_on_duty > 0 and available_on_duty > 0:
             use = min(remaining_on_duty, available_on_duty)
             day_log['entries'].append({
@@ -147,7 +137,6 @@ def calculate_eld_logs(current_cycle_used, distance_miles):
             remaining_on_duty -= use
             day_log['total_on_duty'] += use
         
-        # Mandatory rest after 11 hrs driving or 14 hrs on-duty
         if day_log['total_driving'] >= 11 or (day_used >= 14 and (remaining_driving > 0 or remaining_on_duty > 0)):
             sleep = 10
             day_log['entries'].append({
@@ -171,7 +160,6 @@ def calculate_eld_logs(current_cycle_used, distance_miles):
         logs.append(day_log)
         current_day += 1
         
-        # If trip is done, break
         if remaining_driving <= 0 and remaining_on_duty <= 0:
             break
             
@@ -188,20 +176,16 @@ def generate_trip(request):
         dropoff_location = data.get('dropoffLocation', '').strip()
         current_cycle_used = float(data.get('currentCycleUsed', 0))
         
-        # Validate inputs
         if not all([current_location, pickup_location, dropoff_location]):
             return JsonResponse({'error': 'All locations are required'}, status=400)
         
         if current_cycle_used < 0 or current_cycle_used > 70:
             return JsonResponse({'error': 'Current cycle used must be between 0 and 70 hours'}, status=400)
         
-        # Calculate route and distance
         route_data = calculate_route_and_distance(current_location, pickup_location, dropoff_location)
         
-        # Generate ELD logs
         eld_logs = calculate_eld_logs(current_cycle_used, route_data['total_distance'])
         
-        # Calculate remaining cycle after trip
         trip_hours_used = sum(log['total_driving'] + log['total_on_duty'] for log in eld_logs)
         remaining_cycle = max(0, 70 - (current_cycle_used + trip_hours_used))
         
@@ -221,7 +205,6 @@ def generate_trip(request):
     except Exception as e:
         return JsonResponse({'error': f'Server error: {str(e)}'}, status=500)
 
-# Optional: Health check endpoint
 def health_check(request):
     return JsonResponse({
         'status': 'ok',
