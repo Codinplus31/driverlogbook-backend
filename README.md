@@ -24,8 +24,8 @@ pip --version
 ## 📦 Clone the Repository
 
 ```bash
-git clone <your-repo-url>
-cd <your-project-folder>
+git clone https://github.com/Codinplus31/driverlogbook-backend.git
+cd driverlogbook-backend
 ```
 
 ---
