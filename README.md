@@ -52,7 +52,7 @@ source venv/bin/activate
 
 ---
 
-## 📄 Install Dependencies
+##  Install Dependencies
 
 Install all required packages from `requirements.txt`:
 
@@ -71,7 +71,7 @@ django-admin --version
 
 ---
 
-## ▶️ Start the Development Server
+##  Start the Development Server
 
 ```bash
 python manage.py runserver
@@ -86,7 +86,7 @@ http://127.0.0.1:8000/
 ---
 
 
-## ❗ Common Issues
+## Common Issues
 
 ### `ModuleNotFoundError`
 
@@ -101,7 +101,7 @@ pip install -r requirements.txt
 
 ---
 
-## 📌 Notes
+##  Notes
 
 * Always activate the virtual environment before running Django commands
 
