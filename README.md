@@ -4,6 +4,12 @@ This README explains how to initialize and run this Django project locally.
 
 ---
 
+## hosted version
+
+```bash
+https://driverlogbook-backend.onrender.com
+```
+
 ##  Prerequisites
 
 Make sure you have the following installed on your system:
