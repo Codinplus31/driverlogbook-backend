@@ -27,6 +27,7 @@ ALLOWED_HOSTS = ["*"]
 
 
 
+
 INSTALLED_APPS = [
     'corsheaders',
     'django.contrib.admin',
@@ -128,6 +129,7 @@ CORS_ALLOW_HEADERS = [
     'x-requested-with',
 
 ]
+
 
 
 
