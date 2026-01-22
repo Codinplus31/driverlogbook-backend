@@ -4,7 +4,7 @@ This README explains how to initialize and run this Django project locally.
 
 ---
 
-## 🚀 Prerequisites
+##  Prerequisites
 
 Make sure you have the following installed on your system:
 
@@ -21,7 +21,7 @@ pip --version
 
 ---
 
-## 📦 Clone the Repository
+##  Clone the Repository
 
 ```bash
 git clone https://github.com/Codinplus31/driverlogbook-backend.git
@@ -30,7 +30,7 @@ cd driverlogbook-backend
 
 ---
 
-## 🐍 Create & Activate a Virtual Environment (Recommended)
+##  Create & Activate a Virtual Environment (Recommended)
 
 ```bash
 python -m venv venv
